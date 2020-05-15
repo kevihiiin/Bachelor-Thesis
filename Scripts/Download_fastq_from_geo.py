@@ -114,8 +114,8 @@ def download_run(run_id, output_directory, file_name=None):
             file_name = os.path.basename(fastq_aspera_path)
 
         full_path = os.path.join(output_directory, file_name)
-        # if not os.path.exists(full_path):
-        #     os.makedirs(full_path)
+        if not os.path.exists(full_path):
+            os.makedirs(full_path)
 
         cmd = "ascp -QT -l 500m -P33001 {} -i {} era-fasp@{} {}".format(
             "",  # Additional args
