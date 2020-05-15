@@ -17,7 +17,7 @@ from lxml import etree
 # efetch_path = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db={}&id={}'
 accession_path = 'https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc={}&targ=self&form=text&view=brief'
 
-ssh_key_file = '$HOME/.aspera/cli/etc/asperaweb_id_dsa.openssh'
+ssh_key_file = '~/.aspera/cli/etc/asperaweb_id_dsa.openssh'
 
 
 # def id_to_efetch_ids(supplied_id, database='gds'):
@@ -117,7 +117,7 @@ def download_run(run_id, output_directory, file_name=None):
         # if not os.path.exists(full_path):
         #     os.makedirs(full_path)
 
-        cmd = "echo -QT -l 500m -P33001 {} -i {} era-fasp@{} {}".format(
+        cmd = "ascp -QT -l 500m -P33001 {} -i {} era-fasp@{} {}".format(
             "",  # Additional args
             ssh_key_file,
             fastq_aspera_path,
