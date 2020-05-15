@@ -114,6 +114,8 @@ def download_run(run_id, output_directory, file_name=None):
             file_name = os.path.basename(fastq_aspera_path)
 
         full_path = os.path.join(output_directory, file_name)
+        if not os.path.exists(full_path):
+            os.makedirs(full_path)
 
         cmd = "ascp -QT -l 300m -P33001 {} -i {} era-fasp@{} {}".format(
             "",  # Additional args
@@ -188,4 +190,5 @@ if __name__ == '__main__':
     # print(id_text, srx_list)
     # download_run('SRX4169538', '/home/')
     # print(geo_id_to_srx_ids('GSM1936101'))
-    download_file('/home/kevin/dummy.csv')
+    download_file('/nfs/home/users/kyuan/Bachelor-Thesis/Scripts/GEO data list.csv', '/localscratch/kyuan')
+
