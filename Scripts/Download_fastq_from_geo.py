@@ -115,7 +115,7 @@ def download_run(run_id, output_directory, file_name=None):
 
         full_path = os.path.join(output_directory, file_name)
 
-        cmd = "ascp -QT -l 300m -P33001 {} -i {} {} {}".format(
+        cmd = "ascp -QT -l 300m -P33001 {} -i {} era-fasp@{} {}".format(
             "",  # Additional args
             ssh_key_file,
             fastq_aspera_path,
