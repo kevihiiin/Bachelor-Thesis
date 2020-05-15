@@ -114,15 +114,15 @@ def download_run(run_id, output_directory, file_name=None):
             file_name = os.path.basename(fastq_aspera_path)
 
         full_path = os.path.join(output_directory, file_name)
-        if not os.path.exists(full_path):
-            os.makedirs(full_path)
+        # if not os.path.exists(full_path):
+        #     os.makedirs(full_path)
 
         cmd = "ascp -QT -l 300m -P33001 {} -i {} era-fasp@{} {}".format(
             "",  # Additional args
             ssh_key_file,
             fastq_aspera_path,
             full_path)
-        process = subprocess.Popen(cmd.split(' '), shell=True, stdout=subprocess.PIPE)
+        process = subprocess.Popen([x for x in cmd.split(' ') if x], shell=True, stdout=subprocess.PIPE)
 
         while True:
             output = process.stdout.readline()
@@ -130,7 +130,9 @@ def download_run(run_id, output_directory, file_name=None):
                 break
             if output:
                 print(output.strip())
+
         retval = process.poll()
+
         print(f'Retval: {retval}')
 
         # Check md5sum
@@ -193,5 +195,5 @@ if __name__ == '__main__':
     # print(id_text, srx_list)
     # download_run('SRX4169538', '/home/')
     # print(geo_id_to_srx_ids('GSM1936101'))
-    download_file('/nfs/home/users/kyuan/Bachelor-Thesis/Scripts/GEO data list.csv', '/localscratch/kyuan')
+    download_file('GEO data list.csv', '/localscratch/kyuan')
 
