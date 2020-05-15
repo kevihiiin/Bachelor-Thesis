@@ -117,7 +117,7 @@ def download_run(run_id, output_directory, file_name=None):
         # if not os.path.exists(full_path):
         #     os.makedirs(full_path)
 
-        cmd = "ascp -QT -l 300m -P33001 {} -i {} era-fasp@{} {}".format(
+        cmd = "echo -QT -l 500m -P33001 {} -i {} era-fasp@{} {}".format(
             "",  # Additional args
             ssh_key_file,
             fastq_aspera_path,
