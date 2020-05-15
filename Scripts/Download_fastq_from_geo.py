@@ -17,7 +17,7 @@ from lxml import etree
 # efetch_path = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db={}&id={}'
 accession_path = 'https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc={}&targ=self&form=text&view=brief'
 
-ssh_key_file = '~/.aspera/cli/etc/asperaweb_id_dsa.openssh'
+ssh_key_file = os.path.expanduser('~/.aspera/cli/etc/asperaweb_id_dsa.openssh')
 
 
 # def id_to_efetch_ids(supplied_id, database='gds'):
@@ -122,18 +122,9 @@ def download_run(run_id, output_directory, file_name=None):
             ssh_key_file,
             fastq_aspera_path,
             full_path)
-        process = subprocess.Popen([x for x in cmd.split(' ') if x], shell=True, stdout=subprocess.PIPE)
+        process = subprocess.check_call(cmd, stdout=subprocess.PIPE, shell=True)
 
-        while True:
-            output = process.stdout.readline()
-            if process.poll() is not None and output == '':
-                break
-            if output:
-                print(output.strip())
-
-        retval = process.poll()
-
-        print(f'Retval: {retval}')
+        print(f'Retval: {process}')
 
         # Check md5sum
         process = subprocess.Popen(['md5sum', full_path],
