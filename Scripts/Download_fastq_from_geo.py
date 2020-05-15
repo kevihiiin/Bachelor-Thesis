@@ -122,13 +122,16 @@ def download_run(run_id, output_directory, file_name=None):
             ssh_key_file,
             fastq_aspera_path,
             full_path)
-        process = subprocess.check_call(cmd, shell=True, stdout=subprocess.PIPE)
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
 
-        for line in process.stdout:
-            process.stdout.buffer.write(line)
-            process.stdout.buffer.flush()
-            # do stuff with the line variable here
-        process.wait()
+        while True:
+            output = process.stdout.readline()
+            if process.poll() is not None and output == '':
+                break
+            if output:
+                print(output.strip())
+        retval = process.poll()
+        print(f'Retval: {retval}')
 
         # Check md5sum
         process = subprocess.Popen(['md5sum', full_path],
