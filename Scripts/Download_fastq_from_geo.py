@@ -122,7 +122,7 @@ def download_run(run_id, output_directory, file_name=None):
             ssh_key_file,
             fastq_aspera_path,
             full_path)
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        process = subprocess.Popen(cmd.split(' '), stdout=subprocess.PIPE)
 
         while True:
             output = process.stdout.readline()
