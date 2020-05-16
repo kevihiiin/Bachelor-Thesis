@@ -59,6 +59,7 @@ def download_run(run_id, output_directory):
 
         if stdout.decode('UTF-8').split(' ')[0] != fastq_md5checksum:
             return False
+        print(f'Checksum OK')
 
     return True
 
@@ -73,12 +74,13 @@ def download_file(input_csv, base_path=''):
     # Go trough every line of the file
     for index, row in input_df.iterrows():
 
-        print('=== Parse file ===')
+        print('=========== Parse file ============')
         print(row)
+        print()
 
         # Skip if this file has been downloaded
         if pd.notna(row['finished']):
-            print('Already downloaded, skip')
+            print('Already downloaded, skip\n')
             continue
 
         # Parse row details
@@ -97,14 +99,14 @@ def download_file(input_csv, base_path=''):
         for srx_id in srx_id_list:
 
             # Download file, if unsuccessful add tag
-            print(f'Start downloading files...')
+            print(f'Start downloading file for SRA ID {srx_id}')
             if download_run(srx_id, output_directory=output_path):
                 input_df.loc[index, 'finished'] = True
             else:
                 print("Download file failed")
                 continue
 
-        input_df.to_csv(input_csv + '.out')
+        input_df.to_csv(input_csv)
         print('Done')
 
 
