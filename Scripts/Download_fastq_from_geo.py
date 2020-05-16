@@ -12,76 +12,9 @@ from lxml import etree
 # https://github.com/wwood/ena-fast-download/blob/master/ena-fast-download.py
 
 # --- Constants ---
-# ncbi_database = 'gds'
-# esearch_path = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db={}&term={}&retmax=100000'
-# efetch_path = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db={}&id={}'
 accession_path = 'https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc={}&targ=self&form=text&view=brief'
 
 ssh_key_file = os.path.expanduser('~/.aspera/cli/etc/asperaweb_id_dsa.openssh')
-
-
-# def id_to_efetch_ids(supplied_id, database='gds'):
-#     """
-#     Get IDs for efetch from an accession ID (e.g GEO)
-#     :param supplied_id: Accession ID (e.g GEO) to get more infos from
-#     :param database: Database the accession ID is from (e.g 'gds')
-#     :return: list of associated IDs for efetch
-#     """
-#     result = requests.get(esearch_path.format(database, supplied_id))
-#
-#     # If request was unsuccessful stop
-#     if result.status_code != 200:
-#         raise RuntimeError
-#
-#     # Parse as XML
-#     result_tree = etree.fromstring(result.content)
-#
-#     # Stop if the parent / root attribute is not eSearchResults
-#     if result_tree.tag != 'eSearchResult':
-#         raise RuntimeError(result_tree.attrib)
-#
-#     # Return empty list directly if there were no results
-#     id_count = 0
-#     id_list = []
-#
-#     for child in result_tree.getchildren():
-#         child_tag = child.tag
-#         if child_tag == 'Count':
-#             id_count = int(child.text)
-#         elif child_tag == 'IdList':
-#             id_list = [x.text for x in child.getchildren()]
-#
-#     assert len(id_list) == id_count
-#
-#     return id_list
-#
-#
-# def efetch_ids_to_text_and_srx_list(efetch_id_list, database='gds'):
-#     """
-#     Get text for the efetch IDs and extract SRA experiemnt accession IDs (SRX IDs)
-#     :param database: Database the accession ID is from (e.g 'gds')
-#     :param efetch_id_list: list with IDs to fetch information from
-#     :return: concatenated text from all IDs ; list of SRX IDs
-#     """
-#
-#     # The text from all the sites
-#     id_text = ''
-#
-#     # Fetch the text for all the IDs
-#     for efetch_id in efetch_id_list:
-#         result = requests.get(efetch_path.format(database, efetch_id))
-#         if result.status_code != 200:
-#             raise RuntimeError
-#
-#         # Fetch the text
-#         result_text = result.content.decode('UTF-8')
-#         # Add the text to the result text
-#         id_text += result_text
-#
-#     # Extract the SRX IDs from the text
-#     srx_id_list = re.findall(r'SRA Run Selector: .*?=(SRX.*)', id_text)
-#
-#     return id_text, srx_id_list
 
 
 def geo_id_to_srx_ids(geo_id):
@@ -144,7 +77,7 @@ def download_file(input_csv, base_path=''):
         input_df['finished'] = np.nan
 
     # Go trough every line of the file
-    for _, row in input_df.iterrows():
+    for index, row in input_df.iterrows():
 
         print('=== Parse file ===')
         print(row)
@@ -161,7 +94,7 @@ def download_file(input_csv, base_path=''):
 
         # Create output paths
         output_path = os.path.join(base_path, geo_id, file_id)
-        file_name = f'{file_id}.fastq.gz'
+        file_name = f'{file_name}.fastq.gz'
 
         # Get run details from GEO ID
         srx_id = geo_id_to_srx_ids(file_id)[0]
@@ -173,18 +106,16 @@ def download_file(input_csv, base_path=''):
 
         # Download file, if unsuccessful add tag
         print(f'Start downloading files...')
-        if download_run(srx_id, output_directory=output_path, file_name=file_name):
-            input_df['finished'] = True
+        valid_file = download_run(srx_id, output_directory=output_path, file_name=file_name)
+
+        if valid_file:
+            input_df.loc[index, 'finished'] = True
+
+        input_df.to_csv(input_csv + '.out')
 
         print('Done')
 
 
 if __name__ == '__main__':
-    # id_list = id_to_efetch_ids(geo_id)
-    # print(id_list)
-    # id_text, srx_list = efetch_ids_to_text_and_srx_list(id_list)
-    # print(id_text, srx_list)
-    # download_run('SRX4169538', '/home/')
-    # print(geo_id_to_srx_ids('GSM1936101'))
     download_file('GEO data list.csv', '/localscratch/kyuan')
 
