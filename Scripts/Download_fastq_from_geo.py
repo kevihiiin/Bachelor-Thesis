@@ -36,30 +36,33 @@ def download_run(run_id, output_directory):
         f'https://www.ebi.ac.uk/ena/portal/api/filereport?accession={run_id}&download=false&fields=fastq_aspera%2Cfastq_md5&format=json&result=read_run').json()
 
     for single_run in result_json:
-        fastq_aspera_path = single_run['fastq_aspera']
-        fastq_md5checksum = single_run['fastq_md5']
+        fastq_aspera_path_list = single_run['fastq_aspera'].split(';')
+        fastq_md5checksum_list = single_run['fastq_md5'].split(';')
+        
+        for fastq_aspera_path, fastq_md5checksum in zip(fastq_aspera_path_list, fastq_md5checksum_list):
+            print(f'Download file {os.path.basename(fastq_aspera_path)}')
 
-        cmd = "ascp -QT -l 500m -P33001 {} -i {} era-fasp@{} {}".format(
-            "",  # Additional args
-            ssh_key_file,
-            fastq_aspera_path,
-            output_directory)
+            cmd = "ascp -QT -l 500m -P33001 {} -i {} era-fasp@{} {}".format(
+                "",  # Additional args
+                ssh_key_file,
+                fastq_aspera_path,
+                output_directory)
 
-        process = subprocess.check_call(cmd, stdout=subprocess.PIPE, shell=True)
+            process = subprocess.check_call(cmd, stdout=subprocess.PIPE, shell=True)
 
-        print(f'Retval: {process}')
+            print(f'Retval: {process}')
 
-        # Check md5sum
-        full_path = os.path.join(output_directory, os.path.basename(fastq_aspera_path))
-        process = subprocess.Popen(['md5sum', full_path],
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE)
+            # Check md5sum
+            full_path = os.path.join(output_directory, os.path.basename(fastq_aspera_path))
+            process = subprocess.Popen(['md5sum', full_path],
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE)
 
-        stdout, _ = process.communicate()
+            stdout, _ = process.communicate()
 
-        if stdout.decode('UTF-8').split(' ')[0] != fastq_md5checksum:
-            return False
-        print(f'Checksum OK')
+            if stdout.decode('UTF-8').split(' ')[0] != fastq_md5checksum:
+                return False
+            print(f'Checksum OK')
 
     return True
 
