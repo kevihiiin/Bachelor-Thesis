@@ -9,8 +9,8 @@ from pathlib import Path
 parser = argparse.ArgumentParser(description='DYNAMITE Setup generator')
 parser.add_argument('--dynamite', type=str, required=True, help="Dynamite path")
 parser.add_argument('--output', type=str, required=True)
-parser.add_argument('--config', nargs='?', const='setup_all.tsv', type=str)
-parser.add_argument('--template', nargs='?', const='DYNAMITE-TEMPLATE.cfg', type=str)
+parser.add_argument('--config', default='setup_all.tsv', type=str)
+parser.add_argument('--template', default='DYNAMITE-TEMPLATE.cfg', type=str)
 
 args = parser.parse_args()
 
