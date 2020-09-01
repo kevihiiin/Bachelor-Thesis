@@ -35,7 +35,7 @@ with open(config_file) as csv_file:
         hm = sample['hm']
 
         # --- Create folder structure
-        output_path = output_base_path.joinpath(time_point, hm)
+        output_path = output_base_path.joinpath('DYNAMITE', time_point, hm)
         output_path.mkdir(parents=True, exist_ok=True)
 
         # --- Create DYNAMITE configuration file
