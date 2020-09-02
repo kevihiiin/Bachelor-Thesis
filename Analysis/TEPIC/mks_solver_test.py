@@ -7,6 +7,7 @@ Multiple Knapsack problem example
 
 from __future__ import print_function
 from ortools.linear_solver import pywraplp
+from tqdm import tqdm
 
 import random
 
@@ -38,23 +39,28 @@ def main():
 
     # Variables
     # x[i, j] = 1 if item i is packed in bin j.
+    print('Add variables to bin')
     x = {}
-    for i in data['items']:
+    for i in tqdm(data['items']):
         for j in data['bins']:
             x[(i, j)] = solver.IntVar(0, 1, 'x_%i_%i' % (i, j))
 
     # Constraints
     # Each item can be in at most one bin.
-    for i in data['items']:
+    print('Add constraints placed once')
+    for i in tqdm(data['items']):
         solver.Add(sum(x[i, j] for j in data['bins']) <= 1)
     # The amount packed in each bin cannot exceed its capacity.
-    for j in data['bins']:
+    print('Add constraints max capacity')
+    for j in tqdm(data['bins']):
         solver.Add(
             sum(x[(i, j)] * data['weights'][i]
                 for i in data['items']) <= data['bin_capacities'][j])
 
     # Objective
+    print('Start solver')
     objective = solver.Objective()
+    print('Finished solving')
 
     for i in data['items']:
         for j in data['bins']:
