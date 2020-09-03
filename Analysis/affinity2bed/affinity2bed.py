@@ -8,7 +8,7 @@ from pathlib import Path
 # Argument parser
 parser = argparse.ArgumentParser(description='TEPIC affinity to bed files converter')
 parser.add_argument('--input', type=str, required=True, help="TEPIC _Affinity.txt input file path")
-parser.add_argument('--pattern', type=str, help="Pattern of TF name that will be extracted to bed files")
+parser.add_argument('--filter', type=str, help="Pattern of TF name that will be extracted to bed files")
 parser.add_argument('--scaling', default=1000, type=int, help="Scaling to apply to each TF affinity score")
 parser.add_argument('--cutoff', default=1, type=int, help="Filter out regions where final score is smaller than cutoff")
 
@@ -16,7 +16,7 @@ args = parser.parse_args()
 
 # Config options
 input_file_path = Path(args.input)
-tf_pattern = args.pattern
+tf_pattern = args.filter
 tf_scaling = args.scaling
 tf_cutoff = args.cutoff
 # Print configuration
@@ -35,9 +35,9 @@ value_df = input_df.iloc[:, 1:]  # Peak value
 
 position_df = pd.DataFrame()
 position_df[['chr', 'start']] = header_df.str.split(':', expand=True)
-position_df[['start', 'end']] = position_df.iloc[:, 0 - 1].str.split('-', expand=True)
+position_df[['start', 'end']] = position_df.iloc[:, 0 - 1].str.split('-', expand=True).astype(int)
 
-full_df = pd.concat([position_df, value_df], axis=1)
+full_df = pd.concat([position_df, value_df], axis=1).sort_values(by=['chr', 'start'])
 
 # Get the candidates (e.g. containing STAT)
 if tf_pattern:
