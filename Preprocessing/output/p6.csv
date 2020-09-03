@@ -1,0 +1,16 @@
+group,replicate,fastq_1,fastq_2,antibody,control
+WT_p6_GR,,/nfs/data/Hennighausen/01_raw/chipseq/p6/WT_p6_GR_S40_L006_R1_001.fastq.gz,,GR,WT_p6_CONTROL
+WT_p6_GR,,/nfs/data/Hennighausen/01_raw/chipseq/p6/WT_p6_GR_S47_L005_R1_001.fastq.gz,,GR,WT_p6_CONTROL
+WT_p6_H3K27ac,,/nfs/data/Hennighausen/01_raw/chipseq/p6/WT_p6_H3K27ac_deep_S23_L006_R1_001.fastq.gz,,H3K27ac,WT_p6_CONTROL
+WT_p6_H3K27ac,,/nfs/data/Hennighausen/01_raw/chipseq/p6/WT_p6_H3K27ac_S32_L004_R1_001.fastq.gz,,H3K27ac,WT_p6_CONTROL
+WT_p6_H3K27ac,,/nfs/data/Hennighausen/01_raw/chipseq/p6/WT_p6_H3K27ac_S47_L008_R1_001.fastq.gz,,H3K27ac,WT_p6_CONTROL
+WT_p6_H3k4me3,,/nfs/data/Hennighausen/01_raw/chipseq/p6/WT_p6_H3K4me3_S43_L006_R1_001.fastq.gz,,H3k4me3,WT_p6_CONTROL
+WT_p6_MED1,,/nfs/data/Hennighausen/01_raw/chipseq/p6/WT_p6_MED1_S42_L007_R1_001.fastq.gz,,MED1,WT_p6_CONTROL
+WT_p6_MED1,,/nfs/data/Hennighausen/01_raw/chipseq/p6/WT_p6_MED1_S45_L007_R1_001.fastq.gz,,MED1,WT_p6_CONTROL
+WT_p6_NFIB,,/nfs/data/Hennighausen/01_raw/chipseq/p6/WT_p6_NFIB_S36_L006_R1_001.fastq.gz,,NFIB,WT_p6_CONTROL
+WT_p6_RNAPolII,,/nfs/data/Hennighausen/01_raw/chipseq/p6/WT_p6_PolII_S25_L003_R1_001.fastq.gz,,RNAPolII,WT_p6_CONTROL
+WT_p6_RNAPolII,,/nfs/data/Hennighausen/01_raw/chipseq/p6/WT_p6_PolII_S28_L003_R1_001.fastq.gz,,RNAPolII,WT_p6_CONTROL
+WT_p6_STAT5,,/nfs/data/Hennighausen/01_raw/chipseq/p6/WT_p6_p-STAT5_deep_S25_L004_R1_001.fastq.gz,,STAT5,WT_p6_CONTROL
+WT_p6_STAT5,,/nfs/data/Hennighausen/01_raw/chipseq/p6/WT_p6_STAT5_S34_L006_R1_001.fastq.gz,,STAT5,WT_p6_CONTROL
+WT_p6_STAT5,,/nfs/data/Hennighausen/01_raw/chipseq/p6/WT_p6_STAT5_S41_L005_R1_001.fastq.gz,,STAT5,WT_p6_CONTROL
+WT_p6_CONTROL,,/nfs/data/Hennighausen/01_raw/chipseq/controls/p6/P6-WT_Input.fastq.gz,,,

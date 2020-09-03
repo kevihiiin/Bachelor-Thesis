@@ -1,0 +1,15 @@
+group,replicate,fastq_1,fastq_2,antibody,control
+WT_p13_ELF5,,/nfs/data/Hennighausen/01_raw/chipseq/p13/ChIPSeq_WT_p13_ELF5.fastq.gz,,ELF5,WT_p13_CONTROL
+WT_p13_ELF5,,/nfs/data/Hennighausen/01_raw/chipseq/p13/ChIPSeq_WT_p13_ELF5_rep2.fastq.gz,,ELF5,WT_p13_CONTROL
+WT_p13_GR,,/nfs/data/Hennighausen/01_raw/chipseq/p13/ChIPSeq_WT_p13_GR_rep1.fastq.gz,,GR,WT_p13_CONTROL
+WT_p13_GR,,/nfs/data/Hennighausen/01_raw/chipseq/p13/ChIPSeq_WT_p13_GR_rep2.fastq.gz,,GR,WT_p13_CONTROL
+WT_p13_H3K27ac,,/nfs/data/Hennighausen/01_raw/chipseq/p13/ChIPSeq_WT_p13_H3K27ac_rep1.fastq.gz,,H3K27ac,WT_p13_CONTROL
+WT_p13_H3K27ac,,/nfs/data/Hennighausen/01_raw/chipseq/p13/ChIPSeq_WT_p13_H3K27ac_rep2.fastq.gz,,H3K27ac,WT_p13_CONTROL
+WT_p13_H3K4me3,,/nfs/data/Hennighausen/01_raw/chipseq/p13/ChIPSeq_WT_p13_H3K4me3.fastq.gz,,H3K4me3,WT_p13_CONTROL
+WT_p13_H3K4me3,,/nfs/data/Hennighausen/01_raw/chipseq/p13/ChIPSeq_WT_p13_MECs_H3K4me3.fastq.gz,,H3K4me3,WT_p13_CONTROL
+WT_p13_MED1,,/nfs/data/Hennighausen/01_raw/chipseq/p13/ChIPSeq_WT_p13_MED1.fastq.gz,,MED1,WT_p13_CONTROL
+WT_p13_NFIB,,/nfs/data/Hennighausen/01_raw/chipseq/p13/ChIPSeq_WT_p13_NFIB_rep1.fastq.gz,,NFIB,WT_p13_CONTROL
+WT_p13_NFIB,,/nfs/data/Hennighausen/01_raw/chipseq/p13/ChIPSeq_WT_p13_NFIB_rep2.fastq.gz,,NFIB,WT_p13_CONTROL
+WT_p13_STAT5,,/nfs/data/Hennighausen/01_raw/chipseq/p13/ChIPSeq_WT_p13_STAT5A_rep1.fastq.gz,,STAT5,WT_p13_CONTROL
+WT_p13_STAT5,,/nfs/data/Hennighausen/01_raw/chipseq/p13/ChIPSeq_WT_p13_STAT5A_rep2.fastq.gz,,STAT5,WT_p13_CONTROL
+WT_p13_CONTROL,,/nfs/data/Hennighausen/01_raw/chipseq/controls/p13/merged-p13-Input-090815_GTCCGC_L007_R1_001.fastq.gz,,,
