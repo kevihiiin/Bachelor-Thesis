@@ -16,14 +16,13 @@ import random
 def create_data_model():
     """Create the data for the example."""
     data = {}
-    num = 50000
+    num = 500
     peaks = [random.randint(20, 100) for i in range(num)]
-    data['weights'] = [1] * num
-    data['values'] = [x + 2 for x in peaks]
+    data['weights'] = [x + 1 for x in peaks]
+    data['values'] = [1] * num
     data['items'] = list(range(num))
-    data['num_items'] = num
     data['bins'] = list(range(num))
-    data['bin_capacities'] = peaks
+    data['bin_capacities'] = [x + 1 for x in peaks]
     return data
 
 
@@ -58,19 +57,18 @@ def main():
                 for i in data['items']) <= data['bin_capacities'][j])
 
     # Objective
-    print('Start solver')
     objective = solver.Objective()
-    print('Finished solving')
 
     for i in data['items']:
         for j in data['bins']:
             objective.SetCoefficient(x[(i, j)], data['values'][i])
     objective.SetMaximization()
 
+    print('Start solver')
     status = solver.Solve()
+    print('Finished solving')
 
     if status == pywraplp.Solver.OPTIMAL:
-        print('Total packed value:', objective.Value())
         total_weight = 0
         for j in data['bins']:
             bin_weight = 0
@@ -86,6 +84,8 @@ def main():
             print('Packed bin value:', bin_value)
             print()
             total_weight += bin_weight
+
+        print('Total packed value:', objective.Value())
         print('Total packed weight:', total_weight)
     else:
         print('The problem does not have an optimal solution.')
