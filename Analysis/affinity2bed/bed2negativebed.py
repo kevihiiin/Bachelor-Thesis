@@ -2,6 +2,7 @@
 
 import os
 import random
+import pybedtools
 from pathlib import Path
 
 import numpy as np
@@ -41,7 +42,8 @@ n_peaks = pd.DataFrame(
     {'chr': sorted_full_df['chr'], 'start': sorted_full_df['end'].shift(1), 'end': sorted_full_df['start']}).dropna()
 n_output_df = pd.DataFrame(columns=['chr', 'start', 'end', 'name', 'score', 'strand'])
 
-n_peaks.iloc[np.random.permutation(np.arange(len(n_peaks)))]
+# Permute rows
+# _ = n_peaks.iloc[np.random.permutation(np.arange(len(n_peaks)))]
 
 # Remove overlapping regions
 overlap_count = len(n_output_df)
@@ -56,7 +58,7 @@ print(f'Removed {overlap_count - len(n_output_df)} overlaps')
 
 # --- Create random peaks
 parameters = stats.lognorm.fit(p_peaks, loc=0)
-random_peaks = list(stats.lognorm.rvs(parameters[0], parameters[1], parameters[2], size=len(p_peaks)).astype(int))
+random_peaks = stats.lognorm.rvs(parameters[0], parameters[1], parameters[2], size=len(p_peaks)).astype(int)
 
 sns.distplot(p_peaks)
 sns.distplot(random_peaks)
@@ -64,6 +66,12 @@ plt.savefig(output_path.joinpath('distplot.svg'))
 # --- Find an optimal packing
 n_peaks['bin'] = n_peaks['end'] - n_peaks['start']
 
+#
+min_random = random_peaks.min()
+n_peaks = n_peaks[n_peaks['bin'] > min_random].sort_values(['bin'])
+
+
+"""
 for split in np.array_split(n_peaks, int(len(n_peaks) / 100)):
     split.reset_index(drop=True, inplace=True)
     tmp_peak_count = len(split)
@@ -133,7 +141,7 @@ for split in np.array_split(n_peaks, int(len(n_peaks) / 100)):
 
     print('Total packed value:', objective.Value())
     print('Total packed weight:', total_weight)
-
+"""
 
 # # No digits
 # n_output_df[["start", "end"]] = n_output_df[["start", "end"]].astype(int)
