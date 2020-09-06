@@ -1,22 +1,29 @@
-# %%
-
-import os
-import random
-import pybedtools
+import argparse
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import pybedtools
 import seaborn as sns
-import matplotlib.pyplot as plt
-
-from tqdm import tqdm
 from ortools.linear_solver import pywraplp
 from scipy import stats
+from tqdm import tqdm
 
-input_bed_path = Path('/home/kevin/tmp/TRASH/WT_L1_STAT5_R5_peaks.narrowPeak')
-reference_bed_path = Path('/home/kevin/Uni/Bachelor-Thesis/Analysis/affinity2bed/chmm38_full_peak.bed')
-output_path = Path('/home/kevin/tmp/TRASH/negative_bed/')
+# Argument parser
+parser = argparse.ArgumentParser(description='Calculates peaks in negative space of bed file "negative peaks"')
+parser.add_argument('--input', type=str, required=True, help='Bed file containing "positive peaks"')
+parser.add_argument('--reference', type=str, default='chmm38_full_peak.bed',
+                    help='Reference bed file containing all regions in genome')
+parser.add_argument('--output', type=str, required=True, help='Output directory where "negative peaks" are written to')
+
+args = parser.parse_args()
+
+# Options
+input_bed_path = Path(args.input)
+reference_bed_path = Path(args.reference)
+output_path = Path(args.output)
+outfile_prefix = input_bed_path.stem # Filename prefix
 
 # --- Parse input files
 # Parse ChIP-seq input file as DataFrame
@@ -35,6 +42,7 @@ print('--- Positive Peaks ---')
 print(f'Positive peak mean: {p_peaks.mean()}')
 print(f'Positive peak min: {p_peaks.min()}')
 print(f'Positive peak max: {p_peaks.max()}')
+print()
 
 # Create random peaks for negative space
 parameters = stats.lognorm.fit(p_peaks, loc=0)
@@ -43,11 +51,12 @@ print('--- Negative Peaks ---')
 print(f'Negative peak mean: {random_peaks.mean()}')
 print(f'Negative peak min: {random_peaks.min()}')
 print(f'Negative peak max: {random_peaks.max()}')
+print()
 random_peaks_sum = random_peaks.sum()
 
 sns.distplot(p_peaks)
 sns.distplot(random_peaks)
-plt.savefig(output_path.joinpath('peaks_distplot.svg'))
+plt.savefig(output_path.joinpath(f'{outfile_prefix}_distplot.svg'))
 
 # --- Find an optimal packing
 n_space_df['bin'] = n_space_df['end'] - n_space_df['start'] - 1
@@ -64,7 +73,9 @@ output_df = pd.DataFrame(columns=bed_file_header)
 
 rng = np.random.default_rng()
 
-for split in np.array_split(n_peaks, int(len(n_peaks) / 200)):
+# Fitting negative peaks
+print('--- Fitting negtive peaks ---')
+for split in tqdm(np.array_split(n_peaks, int(len(n_peaks) / 200))):
     split.reset_index(drop=True, inplace=True)
     tmp_peak_count = len(split)
 
@@ -85,7 +96,7 @@ for split in np.array_split(n_peaks, int(len(n_peaks) / 200)):
 
     # Variables
     # x[i, j] = 1 if item i is packed in bin j.
-    print('Add variables to bin')
+    # print('Add variables to bin')
     x = {}
     for i in data['items']:
         for j in data['bins']:
@@ -93,11 +104,11 @@ for split in np.array_split(n_peaks, int(len(n_peaks) / 200)):
 
     # Constraints
     # Each item can be in at most one bin.
-    print('Add constraints placed once')
+    # print('Add constraints placed once')
     for i in data['items']:
         solver.Add(sum(x[i, j] for j in data['bins']) <= 1)
     # The amount packed in each bin cannot exceed its capacity.
-    print('Add constraints max capacity')
+    # print('Add constraints max capacity')
     for j in data['bins']:
         solver.Add(
             sum(x[(i, j)] * data['weights'][i]
@@ -111,9 +122,9 @@ for split in np.array_split(n_peaks, int(len(n_peaks) / 200)):
             objective.SetCoefficient(x[(i, j)], data['values'][i])
     objective.SetMaximization()
 
-    print('Start solver')
+    # print('Start solver')
     status = solver.Solve()
-    print('Finished solving')
+    # print('Finished solving')
 
     # Get the result and write back to DF
     results_dict = {
@@ -159,22 +170,16 @@ for split in np.array_split(n_peaks, int(len(n_peaks) / 200)):
 
             start = end
     tmp_df = pd.DataFrame.from_dict(results_dict)
-    print(tmp_df)
+    # print(tmp_df)
     output_df = output_df.append(tmp_df)
     total_value += objective.Value()
-    print('Total packed value:', objective.Value())
+    # print('Total packed value:', objective.Value())
 print(f'Total packed value: {total_value} | of {len(n_peaks)}')
 print(f'Total packed weight: {total_weight} | of {random_peaks_sum}')
+print()
 
 output_df['name'] = 'negative_peak'
-print(output_df)
-output_df.to_csv(output_path.joinpath('negative_peak.bed'), index=False, header=False, sep="\t")
 
-# # No digits
-# n_output_df[["start", "end"]] = n_output_df[["start", "end"]].astype(int)
-# # Sort
-# n_output_df = n_output_df.sort_values(['chr', 'start'])
-#
-# print(f"MEAN {(n_output_df['end'] - n_output_df['start']).mean()}")
-# print(f"Length {len(n_output_df['start'])}")
-# n_output_df.to_csv(os.path.join(output_dir, 'negative_peak.bed'), index=False, header=False, sep='\t')
+print('--- Writing output file ---')
+print(output_df)
+output_df.to_csv(output_path.joinpath(f'{outfile_prefix}_negative.bed'), index=False, header=False, sep="\t")
