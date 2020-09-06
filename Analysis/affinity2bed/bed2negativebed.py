@@ -14,65 +14,57 @@ from tqdm import tqdm
 from ortools.linear_solver import pywraplp
 from scipy import stats
 
-
-input_file_path = '/home/kevin/tmp/TRASH/WT_L1_STAT5_R5_peaks.narrowPeak'
+input_bed_path = Path('/home/kevin/tmp/TRASH/WT_L1_STAT5_R5_peaks.narrowPeak')
+reference_bed_path = Path('/home/kevin/Uni/Bachelor-Thesis/Analysis/affinity2bed/chmm38_full_peak.bed')
 output_path = Path('/home/kevin/tmp/TRASH/negative_bed/')
 
-# Parse input file as DataFrame
-full_df = pd.read_table(input_file_path,
+# --- Parse input files
+# Parse ChIP-seq input file as DataFrame
+chip_df = pd.read_table(input_bed_path,
                         names=['chr', 'start', 'end', 'name', 'score', 'strand', 'signalValue', 'pValue', 'qValue',
                                'peak'])
 
-# Create negative peaks
-# Sort DF
-sorted_full_df = full_df
-sorted_full_df[['start', 'end']] = sorted_full_df[['start', 'end']].astype(int)
-sorted_full_df = sorted_full_df.sort_values('start')
+# Create and parse negative space .bed file as DataFrame
+reference_bed = pybedtools.BedTool(reference_bed_path)
+n_space_df = reference_bed.subtract(str(input_bed_path)).to_dataframe()
 
-# Calculate mean of peak width
-p_peaks = sorted_full_df['end'] - sorted_full_df['start']
-peak_mean = p_peaks.mean()
-peak_count = sorted_full_df.shape[1]
-print(f'Positive peak mean: {peak_mean}')
+# --- Peaks handling
+# Get peaks from ChIP-seq file
+p_peaks = chip_df['end'] - chip_df['start'] - 1
+print('--- Positive Peaks ---')
+print(f'Positive peak mean: {p_peaks.mean()}')
 print(f'Positive peak min: {p_peaks.min()}')
 print(f'Positive peak max: {p_peaks.max()}')
 
-# Calculate negative space
-n_peaks = pd.DataFrame(
-    {'chr': sorted_full_df['chr'], 'start': sorted_full_df['end'].shift(1), 'end': sorted_full_df['start']}).dropna()
-n_output_df = pd.DataFrame(columns=['chr', 'start', 'end', 'name', 'score', 'strand'])
-
-# Permute rows
-# _ = n_peaks.iloc[np.random.permutation(np.arange(len(n_peaks)))]
-
-# Remove overlapping regions
-overlap_count = len(n_output_df)
-while True:
-    old_len = len(n_output_df)
-    n_output_df = n_output_df[n_output_df['start'] - n_output_df['end'].shift(1, fill_value=0) >= 0]
-
-    if old_len == len(n_output_df):
-        break
-
-print(f'Removed {overlap_count - len(n_output_df)} overlaps')
-
-# --- Create random peaks
+# Create random peaks for negative space
 parameters = stats.lognorm.fit(p_peaks, loc=0)
 random_peaks = stats.lognorm.rvs(parameters[0], parameters[1], parameters[2], size=len(p_peaks)).astype(int)
+print('--- Negative Peaks ---')
+print(f'Negative peak mean: {random_peaks.mean()}')
+print(f'Negative peak min: {random_peaks.min()}')
+print(f'Negative peak max: {random_peaks.max()}')
+random_peaks_sum = random_peaks.sum()
 
 sns.distplot(p_peaks)
 sns.distplot(random_peaks)
-plt.savefig(output_path.joinpath('distplot.svg'))
+plt.savefig(output_path.joinpath('peaks_distplot.svg'))
+
 # --- Find an optimal packing
-n_peaks['bin'] = n_peaks['end'] - n_peaks['start']
+n_space_df['bin'] = n_space_df['end'] - n_space_df['start'] - 1
 
-#
 min_random = random_peaks.min()
-n_peaks = n_peaks[n_peaks['bin'] > min_random].sort_values(['bin'])
+n_peaks = n_space_df[n_space_df['bin'] > min_random]
+random_peaks = list(random_peaks)
 
+total_weight = 0
+total_value = 0
 
-"""
-for split in np.array_split(n_peaks, int(len(n_peaks) / 100)):
+bed_file_header = ['chrom', 'start', 'end']
+output_df = pd.DataFrame(columns=bed_file_header)
+
+rng = np.random.default_rng()
+
+for split in np.array_split(n_peaks, int(len(n_peaks) / 200)):
     split.reset_index(drop=True, inplace=True)
     tmp_peak_count = len(split)
 
@@ -95,18 +87,18 @@ for split in np.array_split(n_peaks, int(len(n_peaks) / 100)):
     # x[i, j] = 1 if item i is packed in bin j.
     print('Add variables to bin')
     x = {}
-    for i in tqdm(data['items']):
+    for i in data['items']:
         for j in data['bins']:
             x[(i, j)] = solver.IntVar(0, 1, 'x_%i_%i' % (i, j))
 
     # Constraints
     # Each item can be in at most one bin.
     print('Add constraints placed once')
-    for i in tqdm(data['items']):
+    for i in data['items']:
         solver.Add(sum(x[i, j] for j in data['bins']) <= 1)
     # The amount packed in each bin cannot exceed its capacity.
     print('Add constraints max capacity')
-    for j in tqdm(data['bins']):
+    for j in data['bins']:
         solver.Add(
             sum(x[(i, j)] * data['weights'][i]
                 for i in data['items']) <= data['bin_capacities'][j])
@@ -123,25 +115,60 @@ for split in np.array_split(n_peaks, int(len(n_peaks) / 100)):
     status = solver.Solve()
     print('Finished solving')
 
-    total_weight = 0
+    # Get the result and write back to DF
+    results_dict = {
+        'chrom': [],
+        'start': [],
+        'end': [],
+    }  # Dict with lists as columns with all peaks and location
     for j in data['bins']:
         bin_weight = 0
-        bin_value = 0
-        print('Bin ', j, '\n')
+        peaks_list = []  # Holds a list with all the peak lengths for this bin
         for i in data['items']:
             if x[i, j].solution_value() > 0:
-                print('Item', i, '- weight:', data['weights'][i], ' value:',
-                      data['values'][i])
-                bin_weight += data['weights'][i]
-                bin_value += data['values'][i]
-        print('Packed bin weight:', bin_weight)
-        print('Packed bin value:', bin_value)
-        print()
-        total_weight += bin_weight
+                peak_size = data['weights'][i] - 1
+                peaks_list.append(peak_size)
+                bin_weight += peak_size
 
+        total_weight += bin_weight
+        # No peaks in this bin, go to next bin
+        if len(peaks_list) == 0:
+            continue
+
+        # Calculate spacing
+        empty_space = data['bin_capacities'][j] - bin_weight + 1
+        if empty_space > 1:
+            random_integers = np.append(rng.integers(low=1, high=empty_space, size=len(peaks_list)), [0, empty_space])
+            random_integers.sort()
+            spacing_array = np.diff(random_integers)
+        else:
+            spacing_array = rng.integers(2)
+
+        # Create the peak rows
+        chrom = split.iloc[j]['chrom']
+        start = split.iloc[j]['start']
+        gap_end = split.iloc[j]['end']
+
+        for index, peak in enumerate(peaks_list):
+            start += spacing_array[index]
+            end = start + peak
+
+            results_dict['chrom'].append(chrom)
+            results_dict['start'].append(start)
+            results_dict['end'].append(end)
+
+            start = end
+    tmp_df = pd.DataFrame.from_dict(results_dict)
+    print(tmp_df)
+    output_df = output_df.append(tmp_df)
+    total_value += objective.Value()
     print('Total packed value:', objective.Value())
-    print('Total packed weight:', total_weight)
-"""
+print(f'Total packed value: {total_value} | of {len(n_peaks)}')
+print(f'Total packed weight: {total_weight} | of {random_peaks_sum}')
+
+output_df['name'] = 'negative_peak'
+print(output_df)
+output_df.to_csv(output_path.joinpath('negative_peak.bed'), index=False, header=False, sep="\t")
 
 # # No digits
 # n_output_df[["start", "end"]] = n_output_df[["start", "end"]].astype(int)
