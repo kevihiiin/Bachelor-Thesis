@@ -9,8 +9,8 @@ from pathlib import Path
 parser = argparse.ArgumentParser(description='TEPIC affinity to bed files converter')
 parser.add_argument('--input', type=str, required=True, help="TEPIC _Affinity.txt input file path")
 parser.add_argument('--filter', type=str, help="Pattern of TF name that will be extracted to bed files")
-parser.add_argument('--scaling', default=1000, type=int, help="Scaling to apply to each TF affinity score")
-parser.add_argument('--cutoff', default=1, type=int, help="Filter out regions where final score is smaller than cutoff")
+parser.add_argument('--scaling', default=1, type=int, help="Scaling to apply to each TF affinity score")
+parser.add_argument('--cutoff', default=0, type=int, help="Filter out regions where final score is smaller than cutoff")
 
 args = parser.parse_args()
 
