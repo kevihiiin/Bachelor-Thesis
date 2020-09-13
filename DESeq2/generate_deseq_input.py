@@ -6,8 +6,8 @@ from collections import OrderedDict
 from os import path
 
 
-group_1 = 'L1' # case
-group_2 = 'p13' # control / base / earlier
+group_1 = 'Lactation' # case
+group_2 = 'Pregnancy' # control / base / earlier
 
 output_path = '_out'
 

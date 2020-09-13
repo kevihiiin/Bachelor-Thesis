@@ -27,11 +27,13 @@ Source: https://gist.github.com/seanh/93666
     return filename
 
 
-def convert_affinity_to_bed(input_file_path, tf_pattern, tf_scaling, tf_cutoff):
+def convert_affinity_to_bed(input_file_path, output_path, tf_pattern, tf_scaling=1, tf_cutoff=0):
     # Get sample name
-    sample_name = '_'.join(input_file_path.name.split('_')[:2])
+    sample_name = '_'.join(input_file_path.stem.split('_')[:-1])
     # Get and create output dir
-    output_path = input_file_path.parent.joinpath('bed_files')
+    if not output_path:
+        output_path = input_file_path.parent.joinpath('bed_files')
+
     output_path.mkdir(exist_ok=True)
 
     # Parse input DataFrame
@@ -56,7 +58,7 @@ def convert_affinity_to_bed(input_file_path, tf_pattern, tf_scaling, tf_cutoff):
 
     for tf in tf_candidates:
         # Define output path
-        output_file_path = output_path.joinpath(format_filename(tf) + '.bed')
+        output_file_path = output_path.joinpath(f'{sample_name}_{format_filename(tf)}.bed')
         # Create output DataFrame
         output_df = full_df[['chr', 'start', 'end', tf]]
         # Apply scaling to TF affinity score
@@ -75,6 +77,7 @@ if __name__ == '__main__':
     # Argument parser
     parser = argparse.ArgumentParser(description='TEPIC affinity to bed files converter')
     parser.add_argument('--input', type=str, required=True, help="TEPIC _Affinity.txt input file path")
+    parser.add_argument('--output', type=str, help="Output folder to write the bed files to")
     parser.add_argument('--filter', type=str, help="Pattern of TF name that will be extracted to bed files")
     parser.add_argument('--scaling', default=1, type=int, help="Scaling to apply to each TF affinity score")
     parser.add_argument('--cutoff', default=0, type=int,
@@ -84,8 +87,11 @@ if __name__ == '__main__':
 
     # Config options
     input_file_path = Path(args.input)
+    output_path = Path(args.output)
     tf_pattern = args.filter
     tf_scaling = args.scaling
     tf_cutoff = args.cutoff
     # Print configuration
     print(f'Processing input file: {input_file_path}')
+
+    convert_affinity_to_bed(input_file_path, output_path, tf_pattern, tf_scaling, tf_cutoff)

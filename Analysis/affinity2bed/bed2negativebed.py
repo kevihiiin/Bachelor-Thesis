@@ -46,7 +46,7 @@ print()
 
 # Create random peaks for negative space
 parameters = stats.lognorm.fit(p_peaks, loc=0)
-random_peaks = stats.lognorm.rvs(parameters[0], parameters[1], parameters[2], size=len(p_peaks)).astype(int)
+random_peaks = stats.lognorm.rvs(parameters[0], parameters[1], parameters[2], size=len(p_peaks)+500).astype(int)
 print('--- Negative Peaks ---')
 print(f'Negative peak mean: {random_peaks.mean()}')
 print(f'Negative peak min: {random_peaks.min()}')
@@ -64,7 +64,6 @@ n_space_df['bin'] = n_space_df['end'] - n_space_df['start'] - 1
 min_random = random_peaks.min()
 n_peaks = n_space_df[n_space_df['bin'] > min_random]
 random_peaks = list(random_peaks)
-
 total_weight = 0
 total_value = 0
 
