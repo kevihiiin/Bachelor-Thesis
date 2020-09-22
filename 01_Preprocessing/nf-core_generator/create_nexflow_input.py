@@ -1,11 +1,27 @@
+import argparse
+from pathlib import Path
+
 import pandas as pd
 import numpy as np
 
-input_xlsx_path = "/home/kevin/Seafile/Universität/6. Semester/Bachelor Arbeit/Dataset/GEO data list.xlsx"
-time_stamp = 'p6'
+
+# Argument parser
+parser = argparse.ArgumentParser(description='Script to generate the input csv file for the nf-core/chip-seq pipeline.')
+parser.add_argument('--input', type=str, required=True, help="Path to the GEO data list.xlsx excel sheet")
+parser.add_argument('--output', type=str, required=True, help="Path to write the sample_count.xlsx to")
+parser.add_argument('--time-stamp', type=str, required=True, help="Time stamp of the samples that should be used")
+
+args = parser.parse_args()
+
+# Config options
+input_xlsx_path = Path(args.input)
+output_path = Path(args.output)
+time_stamp = args.time_stamp
+
 group_prefix = f'WT_{time_stamp}'
+output_csv_path = output_path.joinpath(f'{time_stamp}_input.csv')
 fastq_path = '/nfs/data/Hennighausen/01_raw/chipseq'
-output_csv_path = f'/home/kevin/Uni/Bachelor-Thesis/Preprocessing/output/{time_stamp}_input.csv'
+
 
 # --- Parse excel file into dataframe
 input_df = pd.read_excel(input_xlsx_path, index_col=[0]).dropna(axis=0, how='all')
