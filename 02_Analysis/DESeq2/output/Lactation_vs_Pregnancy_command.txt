@@ -1,0 +1,1 @@
+metadata_df = data.frame(sample_id = c("L10_WT1", "L10_WT2", "L10_WT3", "L10_WT4", "L1_WT1", "L1_WT2", "L1_WT4", "p13_WT1", "p13_WT2", "p13_WT3", "p13_WT4", "p6_WT1", "p6_WT2", "p6_WT4"), group = c("Lactation", "Lactation", "Lactation", "Lactation", "Lactation", "Lactation", "Lactation", "Pregnancy", "Pregnancy", "Pregnancy", "Pregnancy", "Pregnancy", "Pregnancy", "Pregnancy"))
