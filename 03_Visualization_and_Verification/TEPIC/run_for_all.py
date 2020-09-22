@@ -1,10 +1,11 @@
 import argparse
+import importlib
 from pathlib import Path
 
 import numpy as np
 
-from .affinity_to_bed import convert_affinity_to_bed
-from .calculate_pr_auc import calculate_auroc_score
+from affinity_to_bed import convert_affinity_to_bed
+from calculate_pr_auc import calculate_auroc_score
 
 time_points = ['L1', 'L10', 'p6', 'p13']
 hms = ['H3K27ac', 'H3K4me3']
@@ -18,9 +19,9 @@ parser.add_argument('--tmp', type=str, default="/tmp", help="Temporary path to w
 args = parser.parse_args()
 
 # Config options
-tepic_path = Path(args.tepic_output) # Path of the TEPIC output
-reference_path = Path(args.reference) # Containing the narrowPeak file and _negative.bed files
-tmp_path = Path(args.tmp) # Where to write the temporary affinity -> bed files
+tepic_path = Path(args.tepic_output)  # Path of the TEPIC output
+reference_path = Path(args.reference)  # Containing the narrowPeak file and _negative.bed files
+tmp_path = Path(args.tmp)  # Where to write the temporary affinity -> bed files
 
 result_string = ""
 
