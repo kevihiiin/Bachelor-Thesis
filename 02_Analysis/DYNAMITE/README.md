@@ -13,7 +13,22 @@ Template for DYNAMITE.cfg in which the paths are inserted to.
 ### `setup_dynamite.py`
 Generator script that takes the template and the setup file to generate the DYNAMITE.cfg config files.
 
-Usage:
+Example:
 ```shell script
 python setup_dynamite.py --dynamite <path_to_dynamite> --output <path_to_write_output_to>
 ``` 
+
+Usage:
+```
+usage: setup_dynamite.py [-h] --dynamite DYNAMITE --output OUTPUT [--config CONFIG] [--template TEMPLATE]
+
+DYNAMITE Setup generator
+
+optional arguments:
+  -h, --help           show this help message and exit
+  --dynamite DYNAMITE  Dynamite path
+  --output OUTPUT
+  --config CONFIG
+  --template TEMPLATE
+
+```
