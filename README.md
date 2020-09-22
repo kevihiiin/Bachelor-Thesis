@@ -22,6 +22,6 @@ The code in this repository can be divided into three sections:
 + Setup the configuration files for DYNAMITE
 
 ## Visualization and verification of the results
-[03_Visualization_and_Verification](03_Vizualization_and_Verification) contains scripts to:
+[03_Visualization_and_Verification](03_Visualization_and_Verification) contains scripts to:
 + Verify the results of TEPIC (creating PR-AUC scores)
 + Visualize the results of DYNAMITE.

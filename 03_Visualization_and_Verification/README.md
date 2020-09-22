@@ -1,4 +1,4 @@
-# 03_Visualization_andVerification
+# 03_Visualization_and_Verification
 Contains scripts to visualize the output of DYNAMITE and to generate scores for the TEPIC output.
 
 ## Content
