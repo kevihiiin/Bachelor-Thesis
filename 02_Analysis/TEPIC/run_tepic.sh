@@ -6,13 +6,13 @@ while getopts s:h: flag
 do
     case "${flag}" in
         s) sample_list=${OPTARG};;
-	h) hic=TRUE
+	      h) hic=FALSE;;
     esac
 done
 
 # === Configuration ===
 # General configuration
-input_folder="/nfs/home/users/kyuan/Hennighausen/02_chipseq"
+input_folder="/nfs/data/Hennighausen/02_chipseq"
 output_folder="/nfs/home/users/kyuan/Output/TEPIC"
 
 # TEPIC Configuration

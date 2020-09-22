@@ -12,6 +12,7 @@ library("RColorBrewer")
 library("pheatmap")
 library(DEGreport)
 library(EnhancedVolcano)
+library("egg")
 ```
 
 
@@ -51,8 +52,8 @@ Load data and convert to count matrix and meta data matrix
 # Load data from one file
 ```{r}
 # L1_vs_p6
-metadata_df = data.frame(sample_id = c("L1_WT1", "L1_WT2", "L1_WT4", "p6_WT1", "p6_WT2", "p6_WT4"), group = c("L1", "L1", "L1", "p6", "p6", "p6"))
-input_groups = 'L1_vs_p6'
+# metadata_df = data.frame(sample_id = c("L1_WT1", "L1_WT2", "L1_WT4", "p6_WT1", "p6_WT2", "p6_WT4"), group = c("L1", "L1", "L1", "p6", "p6", "p6"))
+# input_groups = 'L1_vs_p6'
 
 # L1_vs_p13
 # metadata_df = data.frame(sample_id = c("L1_WT1", "L1_WT2", "L1_WT4", "p13_WT1", "p13_WT2", "p13_WT3", "p13_WT4"), group = c("L1", "L1", "L1", "p13", "p13", "p13", "p13"))
@@ -71,8 +72,13 @@ input_groups = 'L1_vs_p6'
 # input_groups = 'L10_vs_p6'
 
 # p13_vs_p6
-# metadata_df = data.frame(sample_id = c("p13_WT1", "p13_WT2", "p13_WT3", "p13_WT4", "p6_WT1", "p6_WT2", "p6_WT4"), group = c("p13", "p13", "p13", "p13", "p6", "p6", "p6"))
-# input_groups = 'p13_vs_p6'
+metadata_df = data.frame(sample_id = c("p13_WT1", "p13_WT2", "p13_WT3", "p13_WT4", "p6_WT1", "p6_WT2", "p6_WT4"), group = c("p13", "p13", "p13", "p13", "p6", "p6", "p6"))
+input_groups = 'p13_vs_p6'
+
+# Lactation vs pregnancy
+# metadata_df = data.frame(sample_id = c("L10_WT1", "L10_WT2", "L10_WT3", "L10_WT4", "L1_WT1", "L1_WT2", "L1_WT4", "p13_WT1", "p13_WT2", "p13_WT3", "p13_WT4", "p6_WT1", "p6_WT2", "p6_WT4"), group = c("Lactation", "Lactation", "Lactation", "Lactation", "Lactation", "Lactation", "Lactation", "Pregnancy", "Pregnancy", "Pregnancy", "Pregnancy", "Pregnancy", "Pregnancy", "Pregnancy"))
+# input_groups = 'Lactation_vs_Pregnancy'
+
 
 
 group_one = strsplit(input_groups, "_")[[1]][1]
@@ -81,7 +87,7 @@ rownames(metadata_df) <- metadata_df$sample_id
 metadata_df$sample_id <- NULL
 
 
-output_path = paste("/nfs/home/users/kyuan/Output/DESeq2", input_groups, '/', input_groups, sep="")
+output_path = paste("/nfs/home/users/kyuan/Output/DESeq2/", input_groups, '/', input_groups, sep="")
 
 count_path = paste("/nfs/home/users/kyuan/Data/DESeq2/", input_groups, ".tsv", sep="")
 count_df = read.csv(count_path, sep = "\t", header = T, row.names = 1)
@@ -92,6 +98,7 @@ Create DESEQDataSet object
 dds <- DESeqDataSetFromMatrix(countData=count_df, 
                               colData=metadata_df, 
                               design=~group)
+dds$group <- factor(dds$group, levels = c(group_two, group_one))
 ```
 Run DESeq2 
 ```{r}
@@ -133,8 +140,8 @@ plotCounts(dds, gene="ENSMUSG00000000381", intgroup="group")
 
 Volcano Plot
 ```{r}
-pdf(file=paste(output_path, '-volcano.pdf'))
-png(file=paste(output_path, '-volcano.png'))
+pdf(file=paste(output_path, '-volcano.pdf', sep=""))
+png(file=paste(output_path, '-volcano.png', sep=""))
 #reset par
 par(mfrow=c(1,1))
 # Make a basic volcano plot
@@ -163,24 +170,37 @@ dev.off()
 
 PCA
 ```{r}
-pdf(file=paste(output_path, '-pca.pdf', sep=''))
+# pdf(file=paste(output_path, '-pca.pdf', sep=''), width=8, height=5)
+# vsdata <- vst(dds, blind=FALSE)
+# plotPCA(vsdata,  ntop = 500, intgroup="group") #using the DESEQ2 plotPCA fxn we can
+# dev.off()
 vsdata <- vst(dds, blind=FALSE)
-plotPCA(vsdata, intgroup="group") #using the DESEQ2 plotPCA fxn we can
-dev.off()
+pcaData <- plotPCA(vsdata,  ntop = 500, intgroup="group", returnData=TRUE) 
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+plot6 <- ggplot(pcaData, aes(PC1, PC2, color=group), title = "ASF") +
+  geom_point(size=3) +
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
+  coord_fixed() + 
+  ggtitle(gsub("_", " ", input_groups)) +
+  theme(plot.title = element_text(hjust = 0.5))
+ggsave(paste(output_path, '-pca.pdf', sep=''), height = 5 , width = 8)
 ```
 Heatmap
 ```{r}
-pdf(file=paste(output_path, '-heatmap.pdf', sep=''))
+pdf(file=paste(output_path, '-heatmap.pdf', sep=''), width=5, height=5)
 sampleDists <- dist(t(assay(vsdata)))
 sampleDistMatrix <- as.matrix(sampleDists)
-rownames(sampleDistMatrix) <- paste(vsdata$condition, vsdata$type, sep="-")
-colnames(sampleDistMatrix) <- NULL
+rownames(sampleDistMatrix) <- rownames(metadata_df)
+colnames(sampleDistMatrix) <- rownames(metadata_df)
 colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
 pheatmap(sampleDistMatrix,
          clustering_distance_rows=sampleDists,
          clustering_distance_cols=sampleDists,
-         col=colors)
-ggsave(paste(output_path, '-heatmap.pdf', sep=''))
+         col=colors,
+         angle_col = 45,
+         main=gsub("_", " ", input_groups))
+dev.off()
 ```
 Advanced stuff
 ```{r}
@@ -188,4 +208,10 @@ DEGreport::degPlot(dds = dds, res = res, n = 6, xs = "group")
 ggsave(paste(output_path, '-gene_count.pdf', sep=""))
 ggsave(paste(output_path, '-gene_count.png', sep=""))
 ```
+```{r}
+library("gridExtra")
+grid.arrange(plot1, plot2, plot2, plot4, plot5, plot6, 
+        ncol=2, nrow=3, widths=c(7, 7), heights=c(5, 5, 5))
+```
+
 
