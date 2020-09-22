@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 
 import pybedtools
@@ -38,9 +39,18 @@ def calculate_auroc_score(sample_path, positive_set_path, negative_set_path):
     return result
 
 if __name__ == '__main__':
-    positive_set_path = Path('WT_L1_STAT5_R5_peaks.narrowPeak')
-    negative_set_path = Path('WT_L1_STAT5_R5_peaks_negative.bed')
-    sample_path = 'Stat5a--Stat5b.bed'
+    # Argument parser
+    parser = argparse.ArgumentParser(description='Caclulate the PR-AUC scores for TEPIC output')
+    parser.add_argument('--sample', type=str, required=True, help="TEPIC output converted to bed file")
+    parser.add_argument('--positive-ref', type=str, help="Bed file containing the positive peaks")
+    parser.add_argument('--negative-ref', type=str, help="Bed file for negative peaks, output of bed_to_negative")
+
+    args = parser.parse_args()
+
+    # Config options
+    sample_path = Path(args.sample)
+    positive_set_path = Path(args.positive_ref)
+    negative_set_path = Path(args.negative_ref)
 
     score = calculate_auroc_score(sample_path, positive_set_path, negative_set_path)
     print(score)

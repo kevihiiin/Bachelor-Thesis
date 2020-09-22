@@ -9,17 +9,19 @@ The code in this repository can be divided into three sections:
 
 
 ## Preprocessing of the datasets
-The data used to create the datasets first needs to be fetched using their GEO IDs.
-Specifically, the raw NGS sequencing files need to be obtained. This download helper script can be found in
-```
-PA_Scripts/Download_Data
-```
-The files are then preprocessed using the nf-core ChIP-seq[5] and RNA-seq[6] pipeline. The ChIP-seq pipeline requires 
-an input setup file, containing the paths to the sample and some metadata. A script to create all the files can be found in
-```
-Preprocessing
-```
+[01_Preprocessing](01_Preprocessing) contains scripts used to:
++ Download all the raw fastq files from GEO IDs
++ Count the number of biological replicates
++ Check for duplicate files
++ Create the the input.csv needed for the nf-core/chip-seq pipeline
 
 ## Analysis of the data
+[02_Analysis](02_Analysis) contains scripts used to:
++ Generate and visualize the output for DESeq2
++ Generate the output for TEPIC
++ Setup the configuration files for DYNAMITE
 
 ## Visualization and verification of the results
+[03_Visualization_and_Verification](03_Vizualization_and_Verification) contains scripts to:
++ Verify the results of TEPIC (creating PR-AUC scores)
++ Visualize the results of DYNAMITE.

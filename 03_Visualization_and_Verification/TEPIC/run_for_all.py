@@ -1,18 +1,26 @@
+import argparse
 from pathlib import Path
 
 import numpy as np
 
-from Analysis.affinity2bed.affinity2bed import convert_affinity_to_bed
-from Analysis.TEPIC.calculate_auroc import calculate_auroc_score
+from .affinity_to_bed import convert_affinity_to_bed
+from .calculate_pr_auc import calculate_auroc_score
 
 time_points = ['L1', 'L10', 'p6', 'p13']
-# time_points = ['L1']
 hms = ['H3K27ac', 'H3K4me3']
-# hms = ['H3K27me3', 'H3K4me1']
 
-tepic_path = Path('/home/kevin/tmp/OUTPUT/TEPIC/')
-output_path = Path('/home/kevin/tmp/OUTPUT/TEPIC/affinity_bed')
-reference_path = Path('/home/kevin/tmp/OUTPUT/STAT5/')
+# Argument parser
+parser = argparse.ArgumentParser(description='Caclulate the PR-AUC scores for all of the TEPIC output')
+parser.add_argument('--tepic-output', type=str, required=True, help="TEPIC output converted to bed file")
+parser.add_argument('--reference', type=str, help="Folder containing the reference ChIP-seq files")
+parser.add_argument('--tmp', type=str, default="/tmp", help="Temporary path to write the generated bed files to")
+
+args = parser.parse_args()
+
+# Config options
+tepic_path = Path(args.tepic_output) # Path of the TEPIC output
+reference_path = Path(args.reference) # Containing the narrowPeak file and _negative.bed files
+tmp_path = Path(args.tmp) # Where to write the temporary affinity -> bed files
 
 result_string = ""
 
@@ -21,7 +29,7 @@ for time in time_points:
         print(f'========== START ===========')
         # --- Convert affinities to bed files
         current_path = tepic_path.joinpath(time, hm)
-        affinity_bed_folder_path = output_path.joinpath(time, hm)
+        affinity_bed_folder_path = tmp_path.joinpath(time, hm)
 
         # Convert affinity to bed
         run_conversion = False
@@ -53,5 +61,5 @@ for time in time_points:
         result_string += str(np.mean(results_list)) + '\n'
         result_string += "Std: " + str(np.std(results_list)) + '\n\n'
 
-with open('scores_2.txt', 'w') as result_file:
+with open('result_scores.txt', 'w') as result_file:
     result_file.write(result_string)
